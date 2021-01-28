@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "sourceMap": false,
+    "declaration": true,
+    "module": "es2015",
+    "lib": ["dom", "es6"],
+    "allowJs": true,
+    "removeComments": false,
+    "moduleResolution": "node",
+    "strict": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitAny": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "importHelpers": true,
+    "stripInternal": true,
+    "downlevelIteration": true,
+    "useDefineForClassFields": true,
+    "outDir": "build"
+  },
+  "files": ["src/index.ts"]
+}
