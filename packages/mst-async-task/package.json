@@ -19,7 +19,8 @@
     "build": "tsc && cpr build dist --overwrite --filter=\\.js$ && rollup -c",
     "dev": "tsc -w",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "prepublish": "yarn build"
   },
   "repository": {
     "type": "git",
@@ -27,6 +28,7 @@
   },
   "keywords": [
     "mobx-state-tree",
+    "action",
     "async",
     "promise",
     "task"
