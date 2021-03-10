@@ -120,6 +120,10 @@ Model that encapsulates the state of an async action.
 | ---------------- | ------------------ | ---------------------------------------------------------- | 
 | **status**       | AsyncTaskStatus    | 'init' \| 'pending' \| 'complete' \| 'failed' \| 'aborted' |
 | **error**        | Error \| undefined | Any error that is thrown during task execution.            |
+
+### Views
+| Name             | Type               | Description                                                |
+| ---------------- | ------------------ | ---------------------------------------------------------- | 
 | **clean**        | boolean            | Indicates the task has not been run yet.                   |
 | **pending**      | boolean            | Indicates the task is currently running.                   |
 | **complete**     | boolean            | Indicates the task completed successfully.                 |
