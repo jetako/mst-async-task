@@ -1,5 +1,4 @@
 import resolve from 'rollup-plugin-node-resolve'
-import sourceMaps from 'rollup-plugin-sourcemaps'
 
 const pkg = require('./package.json')
 
@@ -12,12 +11,11 @@ export default {
   input: 'build/index.js',
   external: ['mobx-state-tree', 'tslib'],
   output: [
-    { file: pkg.main, format: 'cjs', globals, sourcemap: true },
-    { file: pkg['umd:main'], name: 'mstAsyncTask', format: 'umd', globals, sourcemap: true },
-    { file: pkg.module, format: 'es', globals, sourcemap: true },
+    { file: pkg.main, format: 'cjs', globals },
+    { file: pkg['umd:main'], name: 'mstAsyncTask', format: 'umd', globals },
+    { file: pkg.module, format: 'es', globals },
   ],
   plugins: [
-    resolve(),
-    sourceMaps(),
+    resolve()
   ]
 }
