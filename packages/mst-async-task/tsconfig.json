@@ -6,6 +6,7 @@
     "module": "es2015",
     "lib": ["dom", "es6"],
     "allowJs": true,
+    "esModuleInterop": true,
     "removeComments": false,
     "moduleResolution": "node",
     "strict": true,

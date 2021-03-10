@@ -1,7 +1,6 @@
 .DS_Store
-/build
-/dist
 node_modules/
 npm-debug.log
 yarn-debug.log*
 yarn-error.log*
+.eslintcache

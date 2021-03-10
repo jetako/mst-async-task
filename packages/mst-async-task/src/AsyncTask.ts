@@ -51,23 +51,28 @@ export const AsyncTask = types
     }
   })
   .actions(self => {
-    const task = self as IAsyncTask
-
-    return {
-      abort() {
-        if (task._abortController) {
-          task._abortController.abort()
-        }
-      },
-
-      reset() {
-        if (task.pending) {
-          throw new Error('AsyncTask cannot be reset while pending.')
-        }
-        task.status = AsyncTaskStatus.INIT
-        task.error = undefined
+    const abort = () => {
+      const task = self as IAsyncTask
+      if (task._abortController) {
+        task._abortController.abort()
       }
     }
+
+    const reset = () => {
+      abort()
+      self.status = AsyncTaskStatus.INIT
+      self.error = undefined
+    }
+    
+    /**
+     * Used internally by `runTask()`. This should not be called directly.
+     */
+    const setState = (status: AsyncTaskStatus, error?: Error) => {
+      self.status = status
+      self.error = error
+    }
+
+    return { abort, reset, setState }
   })
 
 export interface IAsyncTask extends Instance<typeof AsyncTask> {

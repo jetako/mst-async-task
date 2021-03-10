@@ -50,8 +50,7 @@ let parentAbortSignal: AbortSignal | null = null
  * const loadItem = (itemId: string) => runTask(self.loadItemTask, function*({ exec }) {
  *   const data = yield fetch(`https://example-api.com/items/${itemId}`)
  *   exec(() => {
- *     // This will not be executed if `loadItemTask.abort()` is called while the
- *     // http request is pending.
+ *     // This will not be executed if the task is aborted.
  *     self.item = Item.create(data)
  *   })
  * })
@@ -61,7 +60,7 @@ let parentAbortSignal: AbortSignal | null = null
  *   const user = yield fetch(`https://example-api.com/user`)
  *   // If the loadItem task encounters an error, it will propagate up to
  *   // the loadUser task.
- *   exec(self.loadItem, user.itemId)
+ *   yield exec(self.loadItem, user.itemId)
  * })
  *
  * @param task AsyncTask instance that encapsulates the task status.
@@ -70,25 +69,30 @@ let parentAbortSignal: AbortSignal | null = null
  * for a detailed explanation.
  * @returns Promise(AsyncTaskResult)
  */
-export function runTask(
+export async function runTask(
   task: IAsyncTask,
   generator: (params: { signal: AbortSignal, exec: Function }) => Generator<Promise<any>, any, any>
 ) {
-  return flow(function*() {
-    const abortController = new AbortController()
-    const { signal } = abortController
+  const abortController = new AbortController()
+  const { signal } = abortController
 
-    if (parentAbortSignal) {
-      parentAbortSignal.addEventListener('abort', () => {
-        abortController.abort()
-      })
+  if (task._abortController) {
+    task._abortController.abort()
+    delete task._abortController
+  }
+
+  if (parentAbortSignal) {
+    parentAbortSignal.addEventListener('abort', () => {
+      abortController.abort()
+    })
+  }
+
+  const exec = (fn: Function, ...args: any[]) => {
+    if (!isAlive(task) || !task.pending || signal.aborted) {
+      throw new AsyncTaskAbortError()
     }
-
-    const exec = async (fn: Function, ...args: any[]) => {
-      if (signal.aborted || task.status !== AsyncTaskStatus.PENDING || !isAlive(task)) {
-        throw new AsyncTaskAbortError()
-      }
-
+    
+    const execAsync = async () => {
       try {
         parentAbortSignal = signal
         const ret = fn(...args)
@@ -108,47 +112,52 @@ export function runTask(
         throw error
       }
     }
+    
+    return execAsync()
+  }
 
-    if (task.pending) {
-      task.abort()
+  task.status = AsyncTaskStatus.PENDING
+  task.error = undefined
+  task._abortController = abortController
+
+  const [status, error]: [AsyncTaskStatus, Error?] = await new Promise(async resolve => {
+    const done = (result: [AsyncTaskStatus, Error?]) => {
+      signal.removeEventListener('abort', abortHandler)
+      resolve(result)
     }
 
-    task.status = AsyncTaskStatus.PENDING
-    task.error = undefined
-    task._abortController = abortController
+    const abortHandler = () => {
+      const status = AsyncTaskStatus.ABORTED
+      const error = new AsyncTaskAbortError()
+      // To ensure that the effects of `task.abort()` are synchronous,
+      // set task properties immediately instead of on next tick.
+      if (isAlive(task) && task.pending) {
+        task.setState(status, error)
+      }
+      done([status, error])
+    }
 
-    let result: AsyncTaskResult
+    signal.addEventListener('abort', abortHandler)
 
     try {
-      yield flow(generator)({ signal, exec })
-
-      if (signal.aborted) {
-        const abortError = new AsyncTaskAbortError()
-        task.status = AsyncTaskStatus.ABORTED
-        task.error = abortError
-        result = new AsyncTaskResult(abortError)
-      } else {
-        task.status = AsyncTaskStatus.COMPLETE
-        result = new AsyncTaskResult()
-      }
+      await flow(generator)({ signal, exec })
+      done([AsyncTaskStatus.COMPLETE])
     } catch (error) {
       if (error instanceof AsyncTaskAbortError) {
-        task.status = AsyncTaskStatus.ABORTED
-        task.error = error
-        result = new AsyncTaskResult(error)
-      } else if (signal.aborted) {
-        const abortError = new AsyncTaskAbortError()
-        task.status = AsyncTaskStatus.ABORTED
-        task.error = abortError
-        result = new AsyncTaskResult(abortError)
+        done([AsyncTaskStatus.ABORTED, error])
       } else {
-        task.status = AsyncTaskStatus.FAILED
-        task.error = error
-        result = new AsyncTaskResult(error)
+        done([AsyncTaskStatus.FAILED, error])
       }
     }
+  })
 
+  if (isAlive(task) && task.pending && !signal.aborted) {
+    task.setState(status, error)
+  }
+
+  if (abortController === task._abortController) {
     delete task._abortController
-    return result
-  })()
+  }
+  
+  return new AsyncTaskResult(status, error)
 }
