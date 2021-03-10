@@ -2,6 +2,8 @@ import { flow, isAlive } from 'mobx-state-tree'
 import { IAsyncTask } from './AsyncTask'
 import { AsyncTaskStatus, AsyncTaskResult, AsyncTaskAbortError } from './lib'
 
+type Exec = <T extends (...args: any[]) => any>(callback: T, ...args: Parameters<T>) => any
+
 let parentAbortSignal: AbortSignal | null = null
 
 /**
@@ -71,8 +73,8 @@ let parentAbortSignal: AbortSignal | null = null
  */
 export async function runTask(
   task: IAsyncTask,
-  generator: (params: { signal: AbortSignal, exec: Function }) => Generator<Promise<any>, any, any>
-) {
+  generator: (params: { signal: AbortSignal, exec: Exec }) => Generator<Promise<any>, any, any>
+): Promise<AsyncTaskResult> {
   const abortController = new AbortController()
   const { signal } = abortController
 
@@ -87,7 +89,7 @@ export async function runTask(
     })
   }
 
-  const exec = (fn: Function, ...args: any[]) => {
+  const exec: Exec = (callback, ...args) => {
     if (!isAlive(task) || !task.pending || signal.aborted) {
       throw new AsyncTaskAbortError()
     }
@@ -95,7 +97,7 @@ export async function runTask(
     const execAsync = async () => {
       try {
         parentAbortSignal = signal
-        const ret = fn(...args)
+        const ret = callback(...args)
         parentAbortSignal = null
         const result = await ret
 

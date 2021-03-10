@@ -10,9 +10,12 @@ module.exports = {
   },
 
   plugins: [
-    '@typescript-eslint',
-    'eslint-comments',
-    'jest',
+    '@typescript-eslint'
+  ],
+
+  extends: [
+    'plugin:@typescript-eslint/eslint-recommended',
+    'plugin:@typescript-eslint/recommended'
   ],
 
   settings: {
@@ -23,13 +26,14 @@ module.exports = {
 
   overrides: [
     {
-      files: ['*.{spec,test}.{js,ts,tsx}', '**/__tests__/**/*.{js,ts,tsx}'],
+      files: ['**/__tests__/**/*.{js,ts,tsx}'],
       env: {
-        jest: true,
-        'jest/globals': true,
+        jest: true
       },
     },
   ],
+
+  ignorePatterns: ['build/**/**', 'dist/**/**', 'rollup.config.js'],
 
   rules: {
     'comma-dangle': 0,
@@ -40,10 +44,13 @@ module.exports = {
     'no-bitwise': 0,
     'no-shadow': 0,
     'no-unexpected-multiline': 0,
-    'no-unused-vars': [1, { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    'no-unused-vars': 0,
     'semi': [1, 'never'],
     'object-curly-spacing': [1, 'always'],
     'no-trailing-spaces': 0,
-    'quotes': [0, 'single', 'avoid-escape']
-  },
-};
+    'quotes': [0, 'single', 'avoid-escape'],
+
+    '@typescript-eslint/no-explicit-any': 0,
+    '@typescript-eslint/no-unused-vars': [1, { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }]
+  }
+}

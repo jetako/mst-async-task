@@ -20,7 +20,7 @@
     "dev": "tsc -w",
     "test": "jest",
     "lint": "eslint .",
-    "prepublish": "yarn build"
+    "prepublish": "yarn lint && yarn test && yarn build"
   },
   "repository": {
     "type": "git",
