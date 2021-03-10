@@ -1,5 +1,7 @@
 # mst-async-task
-Manage the lifecycles of asynchronous flows in Mobx-State-Tree
+[![npm version](https://badge.fury.io/js/mst-async-task.svg)](https://badge.fury.io/js/mst-async-task)
+
+Manage the lifecycles of asynchronous flows in Mobx-State-Tree.
 
 ## Introduction
 Mobx-State-Tree's `flow` provides a solid foundation for dealing with asynchronous actions, but we're left to do all of the bookkeeping ourselves.
