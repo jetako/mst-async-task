@@ -131,10 +131,10 @@ export async function runTask(
     const abortHandler = () => {
       const status = AsyncTaskStatus.ABORTED
       const error = new AsyncTaskAbortError()
-      // To ensure that the effects of `task.abort()` are synchronous,
+      // To ensure that the effect of aborting is synchronous,
       // set task properties immediately instead of on next tick.
       if (isAlive(task) && task.pending) {
-        task.setState(status, error)
+        task._resolve(status, error)
       }
       done([status, error])
     }
@@ -154,12 +154,8 @@ export async function runTask(
   })
 
   if (isAlive(task) && task.pending && !signal.aborted) {
-    task.setState(status, error)
+    task._resolve(status, error)
   }
 
-  if (abortController === task._abortController) {
-    delete task._abortController
-  }
-  
   return new AsyncTaskResult(status, error)
 }

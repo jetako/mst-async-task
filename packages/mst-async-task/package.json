@@ -1,6 +1,6 @@
 {
   "name": "mst-async-task",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Manage the lifecycles of asynchronous flows in Mobx-State-Tree",
   "main": "dist/mst-async-task.js",
   "umd:main": "dist/mst-async-task.umd.js",
@@ -49,8 +49,8 @@
     "cpr": "^3.0.1",
     "eslint": "^7.18.0",
     "jest": "26.6.0",
-    "mobx": "^4.15.4",
-    "mobx-state-tree": "^3.16.0",
+    "mobx": "^6.1.0",
+    "mobx-state-tree": "^5.0.1",
     "rollup": "^2.38.4",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",

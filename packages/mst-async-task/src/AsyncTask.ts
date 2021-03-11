@@ -67,12 +67,13 @@ export const AsyncTask = types
     /**
      * Used internally by `runTask()`. This should not be called directly.
      */
-    const setState = (status: AsyncTaskStatus, error?: Error) => {
+    const _resolve = (status: AsyncTaskStatus, error?: Error) => {
       self.status = status
       self.error = error
+      delete (self as IAsyncTask)._abortController
     }
 
-    return { abort, reset, setState }
+    return { abort, reset, _resolve }
   })
 
 export interface IAsyncTask extends Instance<typeof AsyncTask> {
