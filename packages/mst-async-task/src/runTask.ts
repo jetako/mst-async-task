@@ -109,9 +109,9 @@ export async function runTask(
         }
 
         return result
-      } catch (error) {
+      } catch (err) {
         parentAbortSignal = null
-        throw error
+        throw err
       }
     }
     
@@ -122,10 +122,10 @@ export async function runTask(
   task.error = undefined
   task._abortController = abortController
 
-  const [status, error]: [AsyncTaskStatus, Error?] = await new Promise(async resolve => {
-    const done = (result: [AsyncTaskStatus, Error?]) => {
+  const [status, error, result]: [AsyncTaskStatus, Error?, any?] = await new Promise(async resolve => {
+    const done = (args: [AsyncTaskStatus, Error?, any?]) => {
       signal.removeEventListener('abort', abortHandler)
-      resolve(result)
+      resolve(args)
     }
 
     const abortHandler = () => {
@@ -142,20 +142,20 @@ export async function runTask(
     signal.addEventListener('abort', abortHandler)
 
     try {
-      await flow(generator)({ signal, exec })
-      done([AsyncTaskStatus.COMPLETE])
-    } catch (error) {
-      if (error instanceof AsyncTaskAbortError) {
-        done([AsyncTaskStatus.ABORTED, error])
+      const result = await flow(generator)({ signal, exec })
+      done([AsyncTaskStatus.COMPLETE, undefined, result])
+    } catch (err) {
+      if (err instanceof AsyncTaskAbortError) {
+        done([AsyncTaskStatus.ABORTED, err])
       } else {
-        done([AsyncTaskStatus.FAILED, error])
+        done([AsyncTaskStatus.FAILED, err])
       }
     }
   })
 
   if (isAlive(task) && task.pending && !signal.aborted) {
-    task._resolve(status, error)
+    task._resolve(status, error, result)
   }
 
-  return new AsyncTaskResult(status, error)
+  return new AsyncTaskResult(status, error, result)
 }

@@ -17,7 +17,8 @@ export const AsyncTask = types
       ]),
       AsyncTaskStatus.INIT
     ),
-    error: types.maybe(types.frozen<Error>())
+    error: types.maybe(types.frozen<Error>()),
+    result: types.maybe(types.frozen<any>())
   })
   .views(self => {
     return {
@@ -62,14 +63,16 @@ export const AsyncTask = types
       abort()
       self.status = AsyncTaskStatus.INIT
       self.error = undefined
+      self.result = undefined
     }
     
     /**
      * Used internally by `runTask()`. This should not be called directly.
      */
-    const _resolve = (status: AsyncTaskStatus, error?: Error) => {
+    const _resolve = (status: AsyncTaskStatus, error?: Error, result?: any) => {
       self.status = status
       self.error = error
+      self.result = result
       delete (self as IAsyncTask)._abortController
     }
 

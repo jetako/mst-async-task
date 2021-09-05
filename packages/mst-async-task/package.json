@@ -1,6 +1,6 @@
 {
   "name": "mst-async-task",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Manage the lifecycles of asynchronous flows in Mobx-State-Tree",
   "main": "dist/mst-async-task.js",
   "umd:main": "dist/mst-async-task.umd.js",

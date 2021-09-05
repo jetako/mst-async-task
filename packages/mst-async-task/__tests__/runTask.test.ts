@@ -50,6 +50,7 @@ describe('runTask()', () => {
               throw new Error('failed')
             }
             exec(() => self.value = 'ok')
+            return 'result'
           }),
           runNoSignal: () => runTask(self.task, function*({ exec }) {
             yield sleep()
@@ -76,7 +77,9 @@ describe('runTask()', () => {
       expect(result).toBeInstanceOf(AsyncTaskResult)
       expect(result.status).toBe(AsyncTaskStatus.COMPLETE)
       expect(result.error).toBeUndefined()
+      expect(result.value).toBe('result')
       expect(store.task.status).toBe(AsyncTaskStatus.COMPLETE)
+      expect(store.task.result).toBe('result')
       expect(store.value).toBe('ok')
     })
 
@@ -96,6 +99,7 @@ describe('runTask()', () => {
       await promise
       store.task.reset()
       expect(store.task.status).toBe(AsyncTaskStatus.INIT)
+      expect(store.task.result).toBeUndefined()
     })
 
     it('aborts the task when abort() is called while pending', async () => {

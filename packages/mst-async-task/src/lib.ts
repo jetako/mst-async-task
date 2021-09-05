@@ -9,10 +9,12 @@ export enum AsyncTaskStatus {
 export class AsyncTaskResult {
   status: AsyncTaskStatus
   error?: Error
+  value?: any
 
-  constructor(status: AsyncTaskStatus, error?: Error) {
+  constructor(status: AsyncTaskStatus, error?: Error, value?: any) {
     this.status = status
     this.error = error
+    this.value = value
   }
 }
 
